@@ -204,7 +204,7 @@
             <h2>Follow the light</h2>
           </div>
           <p class="lead">The components are numbered in the order the light first reaches them.</p>
-          <p>On its way from the fibres to the detector the light crosses the bench several times, so some of the mirrors and lenses are used more than once.</p>
+          <p>On its way from the fibres to the detector the light crosses the bench several times, so some of the mirrors and lenses are used more than once. The red beam is the light on its way to the grating. The orange beam is the same light on its way back to the detector.</p>
           <ol class="index" id="index"></ol>
         </div>
         <div id="g-detail" class="copy" hidden>
@@ -626,6 +626,7 @@ function buildParts(root) {
       o.userData.part = part;
       part.meshes.push(o);
     });
+    if (part.beam) node.visible = false;                            // the short beam stub from the Blender file; the full path replaces it
     parts.push(part);
     byName.set(part.name, part);
   }
@@ -654,6 +655,62 @@ function layout() {
   }
   shadowsDirty();
 }
+
+// ------------------------------------------------------------------ light path
+// Traced through the model's own optical surfaces: fibre, large fold mirror, gold fold mirror, large fold mirror,
+// collimator, grating, double-pass mirror, then back through grating, collimator and both fold mirrors to the detector.
+// `rings` holds 24 edge rays of the beam at each of those surfaces, `chief` the central ray; `split` is the turning point.
+const LIGHT = {"rings":[[-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013,-0.0868,0.6014,-0.013],[0.0548,0.6004,-0.3612,0.0545,0.6033,-0.3613,0.0534,0.606,-0.3615,0.0516,0.6083,-0.3618,0.0493,0.6101,-0.3623,0.0466,0.6112,-0.3628,0.0438,0.6115,-0.3633,0.0409,0.6111,-0.3639,0.0382,0.61,-0.3644,0.036,0.6082,-0.3648,0.0342,0.606,-0.3652,0.0331,0.6033,-0.3654,0.0328,0.6004,-0.3654,0.0331,0.5976,-0.3654,0.0342,0.5949,-0.3651,0.036,0.5926,-0.3648,0.0382,0.5909,-0.3644,0.0409,0.5897,-0.3638,0.0437,0.5893,-0.3633,0.0466,0.5897,-0.3627,0.0493,0.5908,-0.3622,0.0516,0.5926,-0.3618,0.0533,0.5949,-0.3614,0.0545,0.5975,-0.3612],[0.0574,0.6019,0.1841,0.0565,0.6089,0.1839,0.0537,0.6155,0.1834,0.0494,0.6211,0.1825,0.0438,0.6255,0.1814,0.0372,0.6282,0.1801,0.0302,0.6291,0.1788,0.0232,0.6281,0.1774,0.0167,0.6254,0.1762,0.0111,0.621,0.1751,0.0069,0.6154,0.1743,0.0042,0.6089,0.1738,0.0033,0.6019,0.1737,0.0042,0.5949,0.1738,0.0068,0.5883,0.1744,0.0111,0.5827,0.1752,0.0167,0.5784,0.1763,0.0232,0.5756,0.1776,0.0302,0.5747,0.1789,0.0372,0.5756,0.1803,0.0437,0.5783,0.1815,0.0494,0.5826,0.1826,0.0537,0.5882,0.1834,0.0565,0.5948,0.1839],[0.2628,0.6004,-0.321,0.2613,0.6117,-0.3213,0.257,0.6221,-0.3222,0.2501,0.6311,-0.3235,0.2411,0.638,-0.3253,0.2307,0.6423,-0.3273,0.2196,0.6437,-0.3295,0.2084,0.6422,-0.3316,0.1981,0.6378,-0.3336,0.1892,0.6309,-0.3353,0.1824,0.622,-0.3366,0.1781,0.6116,-0.3374,0.1766,0.6004,-0.3376,0.1781,0.5893,-0.3373,0.1823,0.5789,-0.3365,0.1891,0.5699,-0.3352,0.198,0.563,-0.3334,0.2083,0.5587,-0.3314,0.2195,0.5571,-0.3293,0.2306,0.5586,-0.3271,0.2411,0.5628,-0.3251,0.2501,0.5697,-0.3234,0.257,0.5787,-0.3221,0.2613,0.5891,-0.3213],[0.2646,0.6014,0.0517,0.2627,0.6155,0.0516,0.2573,0.6287,0.0514,0.2486,0.64,0.0512,0.2373,0.6486,0.0509,0.2242,0.6541,0.0505,0.2101,0.656,0.0502,0.196,0.6541,0.0498,0.1828,0.6487,0.0495,0.1715,0.64,0.0493,0.1628,0.6287,0.0491,0.1574,0.6156,0.049,0.1555,0.6015,0.049,0.1573,0.5874,0.049,0.1628,0.5742,0.0492,0.1714,0.5629,0.0495,0.1827,0.5542,0.0498,0.1959,0.5487,0.0501,0.21,0.5469,0.0505,0.2241,0.5487,0.0508,0.2373,0.5542,0.0511,0.2486,0.5628,0.0514,0.2572,0.5741,0.0516,0.2627,0.5873,0.0517],[0.2602,0.6018,0.2252,0.2588,0.6159,0.2085,0.2537,0.629,0.193,0.2454,0.6403,0.1795,0.2344,0.649,0.1692,0.2214,0.6544,0.1626,0.2073,0.6563,0.1603,0.1932,0.6544,0.1623,0.1798,0.649,0.1685,0.1683,0.6404,0.1786,0.1593,0.6291,0.1918,0.1534,0.616,0.2072,0.1511,0.6019,0.2238,0.1526,0.5879,0.2405,0.1576,0.5747,0.256,0.1659,0.5635,0.2694,0.177,0.5548,0.2798,0.19,0.5494,0.2864,0.204,0.5475,0.2887,0.2182,0.5493,0.2867,0.2315,0.5548,0.2804,0.2431,0.5634,0.2704,0.2521,0.5746,0.2572,0.2579,0.5878,0.2417],[0.2607,0.6944,0.2097,0.2591,0.6921,0.1958,0.254,0.6901,0.1828,0.2456,0.6884,0.1715,0.2346,0.6872,0.1628,0.2215,0.6865,0.1573,0.2075,0.6865,0.1552,0.1933,0.687,0.1569,0.18,0.6881,0.162,0.1685,0.6897,0.1704,0.1595,0.6917,0.1814,0.1538,0.6939,0.1943,0.1516,0.6962,0.2081,0.1531,0.6985,0.2221,0.1582,0.7005,0.2351,0.1666,0.7022,0.2463,0.1777,0.7034,0.255,0.1907,0.7041,0.2606,0.2047,0.7042,0.2626,0.2189,0.7036,0.261,0.2322,0.7025,0.2558,0.2437,0.7009,0.2475,0.2527,0.699,0.2365,0.2584,0.6967,0.2236],[0.2575,0.6022,0.2247,0.2566,0.6162,0.2081,0.252,0.6293,0.1927,0.244,0.6405,0.1793,0.2333,0.6491,0.169,0.2205,0.6545,0.1625,0.2065,0.6564,0.1601,0.1922,0.6545,0.1621,0.1787,0.6491,0.1684,0.1668,0.6406,0.1784,0.1574,0.6293,0.1915,0.1512,0.6163,0.2069,0.1484,0.6023,0.2234,0.1494,0.5883,0.24,0.154,0.5752,0.2554,0.1619,0.564,0.2688,0.1727,0.5554,0.2791,0.1855,0.5499,0.2856,0.1995,0.5481,0.288,0.2137,0.5499,0.286,0.2272,0.5553,0.2797,0.2391,0.5639,0.2697,0.2485,0.5751,0.2566,0.2548,0.5882,0.2412],[0.2569,0.6025,0.0515,0.256,0.6165,0.0514,0.2514,0.6295,0.0513,0.2435,0.6407,0.051,0.2328,0.6493,0.0508,0.22,0.6547,0.0504,0.206,0.6566,0.0501,0.1918,0.6547,0.0497,0.1783,0.6493,0.0494,0.1664,0.6408,0.0491,0.1569,0.6296,0.0489,0.1506,0.6166,0.0488,0.1477,0.6026,0.0488,0.1486,0.5886,0.0488,0.1532,0.5755,0.049,0.1611,0.5643,0.0492,0.1718,0.5557,0.0495,0.1846,0.5503,0.0498,0.1986,0.5485,0.0502,0.2128,0.5503,0.0505,0.2264,0.5557,0.0508,0.2383,0.5643,0.0511,0.2477,0.5755,0.0513,0.2541,0.5885,0.0514],[0.246,0.6024,-0.3243,0.2453,0.6136,-0.3244,0.2417,0.624,-0.3252,0.2353,0.6329,-0.3264,0.2268,0.6397,-0.3281,0.2165,0.644,-0.3301,0.2054,0.6454,-0.3322,0.1941,0.6439,-0.3344,0.1833,0.6396,-0.3365,0.1739,0.6328,-0.3383,0.1665,0.6239,-0.3397,0.1615,0.6136,-0.3406,0.1592,0.6025,-0.341,0.1599,0.5914,-0.3409,0.1635,0.5811,-0.3401,0.1698,0.5722,-0.3389,0.1782,0.5653,-0.3372,0.1884,0.561,-0.3353,0.1995,0.5595,-0.3331,0.2108,0.5609,-0.3309,0.2216,0.5651,-0.3289,0.2311,0.5719,-0.3271,0.2387,0.5808,-0.3256,0.2438,0.5912,-0.3247],[0.0274,0.6052,0.1783,0.0269,0.6123,0.1782,0.0246,0.6189,0.1777,0.0206,0.6245,0.1769,0.0151,0.6288,0.1759,0.0087,0.6315,0.1746,0.0016,0.6324,0.1732,-0.0056,0.6315,0.1719,-0.0124,0.6287,0.1706,-0.0183,0.6244,0.1694,-0.0231,0.6188,0.1685,-0.0262,0.6122,0.1679,-0.0276,0.6052,0.1677,-0.0272,0.5982,0.1678,-0.0249,0.5917,0.1682,-0.021,0.586,0.169,-0.0156,0.5817,0.1701,-0.0092,0.5789,0.1713,-0.0022,0.578,0.1727,0.005,0.5789,0.1741,0.0119,0.5816,0.1754,0.0179,0.5859,0.1765,0.0227,0.5915,0.1774,0.0259,0.5981,0.178],[-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694,-0.0,0.605,-0.7694]],"chief":[[-0.0868,0.6014,-0.013],[0.0437,0.6004,-0.3633],[0.0302,0.6019,0.1789],[0.2195,0.6004,-0.3294],[0.21,0.6014,0.0503],[0.2057,0.6019,0.2245],[0.2061,0.6953,0.2089],[0.203,0.6022,0.2241],[0.2023,0.6025,0.0501],[0.2024,0.6024,-0.3327],[-0.0003,0.6052,0.173],[-0.0,0.605,-0.7694]],"split":6};
+const light = { group: null, on: true, animate: !reducedMotion, inView: true, pulses: [], pts: [], cum: [0], total: 0, last: 0, slow: 0 };
+function buildLightPath() {
+  const g = new THREE.Group(), N = LIGHT.rings[0].length / 3;
+  const glow = (r, gr, b, opacity) => new THREE.MeshBasicMaterial({ color: new THREE.Color(r, gr, b), transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
+  const beamIn = glow(1.0, 0.02, 0.004, 0.07), beamOut = glow(1.0, 0.3, 0.0, 0.07);
+  const idx = [];
+  for (let i = 0; i < N; i++) { const j = (i + 1) % N; idx.push(i, j, N + i, j, N + j, N + i); }
+  for (let s = 0; s < LIGHT.rings.length - 1; s++) {
+    const pos = new Float32Array(N * 6);
+    pos.set(LIGHT.rings[s], 0); pos.set(LIGHT.rings[s + 1], N * 3);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setIndex(idx);
+    const m = new THREE.Mesh(geo, s < LIGHT.split ? beamIn : beamOut);
+    m.raycast = () => {}; m.renderOrder = 3; g.add(m);
+  }
+  light.pts = LIGHT.chief.map((p) => new THREE.Vector3(p[0], p[1], p[2]));
+  for (let i = 1; i < light.pts.length; i++) light.cum.push(light.cum[i - 1] + light.pts[i].distanceTo(light.pts[i - 1]));
+  light.total = light.cum[light.cum.length - 1];
+  const line = (pts, r, gr, b) => {
+    const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: new THREE.Color(r, gr, b), transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false }));
+    l.raycast = () => {}; l.renderOrder = 3; g.add(l);
+  };
+  line(light.pts.slice(0, LIGHT.split + 1), 1.0, 0.3, 0.2);
+  line(light.pts.slice(LIGHT.split), 1.0, 0.62, 0.2);
+  // pulses that travel along the central ray, to show which way the light goes
+  const ball = new THREE.SphereGeometry(1, 16, 12), coreMat = glow(1.0, 0.85, 0.7, 0.95), haloMat = glow(1.0, 0.3, 0.1, 0.35);
+  for (let k = 0; k < 8; k++) {
+    const core = new THREE.Mesh(ball, coreMat), halo = new THREE.Mesh(ball, haloMat);
+    core.scale.setScalar(0.0045); halo.scale.setScalar(0.012);
+    for (const m of [core, halo]) { m.raycast = () => {}; m.renderOrder = 4; g.add(m); }
+    light.pulses.push({ core, halo, s: (k / 8) * light.total });
+  }
+  placePulses(0);
+  scene.add(g); light.group = g;
+}
+function placePulses(advance) {
+  for (const p of light.pulses) {
+    p.s = (p.s + advance) % light.total;
+    let i = 1;
+    while (i < light.cum.length - 1 && light.cum[i] < p.s) i++;
+    p.core.position.lerpVectors(light.pts[i - 1], light.pts[i], (p.s - light.cum[i - 1]) / (light.cum[i] - light.cum[i - 1]));
+    p.halo.position.copy(p.core.position);
+    p.core.visible = p.halo.visible = light.animate;
+  }
+}
+function syncLight() {                                          // the path only matches the optics while nothing is exploded
+  if (light.group) light.group.visible = light.on && state.explode < 0.005;
+  invalidate();
+}
+new IntersectionObserver((entries) => { light.inView = entries[0].isIntersecting; }).observe(stage);
 
 // ------------------------------------------------------------------ camera moves
 let tween = null;
@@ -761,8 +818,8 @@ function updatePins() {
 
 // ------------------------------------------------------------------ controls
 $('c-lid').addEventListener('change', (e) => { state.lidGoal = e.target.checked ? 1 : 0; if (reducedMotion) { state.lid = state.lidGoal; layout(); } invalidate(); });
-$('c-beam').addEventListener('change', (e) => { for (const p of parts) if (p.beam) p.node.visible = e.target.checked; invalidate(); });
-$('c-explode').addEventListener('input', (e) => { state.explode = e.target.value / 100; layout(); });
+$('c-beam').addEventListener('change', (e) => { light.on = e.target.checked; syncLight(); });
+$('c-explode').addEventListener('input', (e) => { state.explode = e.target.value / 100; layout(); syncLight(); });
 $('b-reset').addEventListener('click', () => home(700));
 $('b-frame').addEventListener('click', () => {
   if (!selected) return;
@@ -791,6 +848,14 @@ function frame(now) {
     layout();
   }
   if (moveEvent && !tween && now - lastHover > 60) { const e = moveEvent; moveEvent = null; lastHover = now; const g = pick(e.clientX, e.clientY); guide.hover(g ? g.index : -1); }
+  if (light.group && light.group.visible && light.animate && light.inView && !document.hidden && now - light.last >= 33) {
+    const gap = light.last ? now - light.last : 33;
+    light.last = now;
+    light.slow = gap > 70 ? light.slow + 1 : Math.max(0, light.slow - 1);
+    if (light.slow > 40) { light.animate = false; placePulses(0); }  // a slow device gets a still light path, not a stuttering page
+    else placePulses(Math.min(0.1, gap / 1000) * 0.8);
+    dirty = true;
+  }
   if (controls.update()) dirty = true;
   if (dirty) { dirty = false; renderer.render(scene, camera); updatePins(); }
 }
@@ -803,6 +868,7 @@ function onModel(gltf) {
   scene.add(gltf.scene);
   buildParts(gltf.scene);
   buildPins();
+  buildLightPath();
   if (guide.selected() >= 0) showSelected(groups[guide.selected()]);
   $('b-frame').hidden = false;
   layout();
@@ -813,7 +879,7 @@ function onModel(gltf) {
   home(0);
   $('loader').hidden = true;
   window.__ready = true;
-  window.__night = { parts, groups, scene, camera, controls, renderer, pick, invalidate, look: LOOK };
+  window.__night = { parts, groups, scene, camera, controls, renderer, pick, invalidate, look: LOOK, light };
   requestAnimationFrame(frame);
 }
 new GLTFLoader().load('models/night.glb', onModel, (ev) => {
