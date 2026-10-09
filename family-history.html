@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <!-- For Apple devices -->
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="description" content="History of the Farret family from 1570 to today, including Johan Farret, who exchanged poems with Petrus Stuyvesant on Curaçao, and Johan Pieter Farret, a member of the First National Assembly of the Batavian Republic.">
+    <meta name="author" content="Casper Farret Jentink">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family History - Casper Farret Jentink</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== Site-wide styles, same as the other pages ===== */
+
+        :root {
+            --dark-bg: #121212;
+            --darker-bg: #0a0a0a;
+            --accent: #c15050;
+            --secondary-accent: #a03c3c;
+            --text: #e0e0e0;
+            --subtle-text: #a0a0a0;
+            --border: #2a2a2a;
+
+            /* additions for this page */
+            --accent-light: #e67373;   /* the light end of the h1 gradient; used for links and years */
+            --card: #1e1e1e;           /* the card fill of the other pages, as a solid colour */
+            --rail: #3d3d3d;           /* the line of descent */
+            --bar: #5c5c5c;            /* lifetimes in the chart */
+            --bg: var(--dark-bg);      /* what sits behind a marker; changes inside the highlighted section */
+            --line: var(--rail);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: var(--darker-bg);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--subtle-text);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--accent), #e67373);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-accent);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            background-color: var(--darker-bg);
+            padding: 3rem 0;
+            text-align: center;
+            margin-top: 5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+        }
+
+        .footer-link {
+            color: var(--subtle-text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            color: var(--accent);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .social-link:hover {
+            background-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            color: var(--subtle-text);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* ===== Family history page ===== */
+
+        .fh p {
+            margin-bottom: 1.5rem;
+            color: var(--subtle-text);
+            max-width: 40rem;
+        }
+
+        .fh a:not(.btn) {
+            color: var(--accent-light);
+            text-decoration: none;
+        }
+
+        .fh a:not(.btn):hover {
+            text-decoration: underline;
+        }
+
+        a:focus-visible,
+        button:focus-visible {
+            outline: 2px solid var(--accent-light);
+            outline-offset: 3px;
+            border-radius: 3px;
+        }
+
+        .fh i {
+            color: var(--text);
+        }
+
+        /* Opening */
+
+        .opening {
+            padding: 5rem 0 2.5rem;
+        }
+
+        .opening h1 {
+            display: inline-block;
+            line-height: 1.15;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--subtle-text);
+            margin-bottom: 1.5rem;
+        }
+
+        .opening .lede {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            max-width: 42rem;
+        }
+
+        /* Evidence marks: filled, half or empty */
+
+        .mark {
+            display: inline-block;
+            width: 0.8em;
+            height: 0.8em;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            background: var(--bg);
+            vertical-align: -0.06em;
+            flex: none;
+        }
+
+        .mark.full {
+            background: currentColor;
+        }
+
+        .mark.half {
+            background: linear-gradient(to right, currentColor 50%, var(--bg) 50%);
+        }
+
+        .opening .key-intro {
+            font-size: 0.95rem;
+            margin: 2rem 0 0;
+        }
+
+        .key {
+            list-style: none;
+            margin-top: 0.9rem;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: var(--subtle-text);
+            display: grid;
+            gap: 0.5rem;
+            max-width: 40rem;
+        }
+
+        .key li {
+            display: grid;
+            grid-template-columns: 1.5rem 1fr;
+            align-items: baseline;
+        }
+
+        .key .mark {
+            color: var(--text);
+        }
+
+        /* Lifetimes chart */
+
+        .chart {
+            padding: 2rem 0 4.5rem;
+        }
+
+        .chart h2 {
+            font-size: 1.5rem;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+
+        .chart .note {
+            font-size: 0.9rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .lives {
+            list-style: none;
+        }
+
+        .lives li {
+            display: grid;
+            grid-template-columns: 17rem minmax(0, 1fr);
+            column-gap: 1.25rem;
+            align-items: center;
+            padding: 0.28rem 0;
+        }
+
+        .lives .who {
+            font-size: 0.92rem;
+            line-height: 1.25;
+            color: var(--text);
+        }
+
+        .lives .who span {
+            color: var(--subtle-text);
+            white-space: nowrap;
+        }
+
+        .track {
+            position: relative;
+            height: 1.15rem;
+            /* century ticks at 1600, 1700, 1800, 1900 on an axis running 1560 to 1940 */
+            background:
+                linear-gradient(var(--border), var(--border)) 10.526% 0 / 1px 100% no-repeat,
+                linear-gradient(var(--border), var(--border)) 36.842% 0 / 1px 100% no-repeat,
+                linear-gradient(var(--border), var(--border)) 63.158% 0 / 1px 100% no-repeat,
+                linear-gradient(var(--border), var(--border)) 89.474% 0 / 1px 100% no-repeat;
+        }
+
+        .bar {
+            position: absolute;
+            top: 0.22rem;
+            bottom: 0.22rem;
+            left: calc((var(--s) - 1560) / 380 * 100%);
+            width: calc((var(--e) - var(--s)) / 380 * 100%);
+            background: var(--bar);
+            border-radius: 3px;
+        }
+
+        .bar.approx {
+            background: linear-gradient(to right, transparent, var(--bar) 14%, var(--bar) 86%, transparent);
+        }
+
+        .bar.gold {
+            background: linear-gradient(to right, var(--accent), var(--accent-light));
+        }
+
+        .lives .axis {
+            padding: 0 0 0.2rem;
+        }
+
+        .lives .axis .track {
+            height: 1.3rem;
+            background: none;
+        }
+
+        .lives .axis .track span {
+            position: absolute;
+            left: calc((var(--y) - 1560) / 380 * 100%);
+            transform: translateX(-50%);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            color: var(--subtle-text);
+        }
+
+        /* The line of descent */
+
+        .gen {
+            position: relative;
+            border-left: 2px solid var(--line);
+            padding: 0 0 4rem 1.75rem;
+            display: grid;
+            grid-template-columns: 12.5rem minmax(0, 40rem);
+            column-gap: 2.5rem;
+        }
+
+        .gen > .mark {
+            position: absolute;
+            left: -1px;
+            top: 0.85rem;
+            transform: translateX(-50%);
+            width: 0.95rem;
+            height: 0.95rem;
+            color: var(--text);
+            box-shadow: 0 0 0 5px var(--bg);
+        }
+
+        .rail {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: var(--subtle-text);
+            padding-top: 0.6rem;
+        }
+
+        .rail .rel {
+            display: block;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .rail .grade {
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .gen h2 {
+            font-size: 2rem;
+            line-height: 1.2;
+            color: var(--accent);
+            margin-bottom: 0.3rem;
+        }
+
+        .gen .name {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .gen h3 {
+            font-size: 1.5rem;
+            line-height: 1.25;
+            color: var(--text);
+            margin: 2.5rem 0 1rem;
+        }
+
+        .aside {
+            margin-top: 2rem;
+            padding: 1.25rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-width: 40rem;
+        }
+
+        .aside p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        .aside .grade {
+            display: block;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            color: var(--accent-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .aside .grade .mark {
+            --bg: #1e1e1e;
+            margin-right: 0.3em;
+        }
+
+        .people {
+            list-style: none;
+            max-width: 40rem;
+        }
+
+        .people li {
+            color: var(--subtle-text);
+            padding-bottom: 1.4rem;
+            margin-bottom: 1.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .people li:last-child {
+            border-bottom: none;
+            margin-bottom: 0.4rem;
+        }
+
+        .people strong {
+            display: block;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 500;
+            line-height: 1.3;
+            color: var(--text);
+        }
+
+        .people .who {
+            display: block;
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--accent-light);
+            margin-bottom: 0.4rem;
+        }
+
+        .gen.last {
+            padding-bottom: 0.4rem;
+        }
+
+        .gen.last > .mark {
+            top: 0.75rem;
+        }
+
+        .gen.last p {
+            margin-bottom: 0;
+            padding-top: 0.45rem;
+        }
+
+        /* The highlighted section: Johan Pieter */
+
+        .band {
+            --bg: var(--card);
+            --line: var(--accent);
+            background-color: var(--card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .band .gen {
+            padding-top: 4.5rem;
+            padding-bottom: 4rem;
+        }
+
+        .band .gen > .mark {
+            top: 5.6rem;
+            color: var(--accent-light);
+        }
+
+        .band .gen h2 {
+            font-size: 2.5rem;
+            line-height: 1.15;
+            background: linear-gradient(to right, var(--accent), #e67373);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .band .gen h3 {
+            margin-top: 3rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--border);
+            max-width: 40rem;
+        }
+
+        .years {
+            list-style: none;
+            margin: 1.5rem 0 2rem;
+            max-width: 40rem;
+        }
+
+        .years li {
+            display: grid;
+            grid-template-columns: 6rem minmax(0, 1fr);
+            column-gap: 1rem;
+            padding: 0.7rem 0;
+            border-top: 1px solid var(--border);
+            color: var(--subtle-text);
+            font-size: 0.98rem;
+            line-height: 1.55;
+        }
+
+        .years li:last-child {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .years .yr {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .years .own {
+            color: var(--text);
+        }
+
+        .years .own .yr {
+            color: var(--accent-light);
+        }
+
+        .years .own .yr::before {
+            content: "";
+            display: inline-block;
+            width: 0.5em;
+            height: 0.5em;
+            border-radius: 50%;
+            background: var(--accent-light);
+            margin-right: 0.4em;
+            vertical-align: 0.1em;
+        }
+
+        .years:not(.mixed) li {
+            color: var(--text);
+        }
+
+        .years:not(.mixed) .yr {
+            color: var(--accent-light);
+        }
+
+        .band .legend {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .legend i {
+            display: inline-block;
+            width: 0.55em;
+            height: 0.55em;
+            border-radius: 50%;
+            background: var(--accent-light);
+            margin-right: 0.4em;
+            vertical-align: 0.08em;
+        }
+
+        .after-band {
+            padding-top: 4.5rem;
+        }
+
+        .after-band > .mark {
+            top: 5.35rem;
+        }
+
+        /* Open questions and sources */
+
+        .closing {
+            padding: 3.5rem 0 0;
+        }
+
+        .closing h2 {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .closing ol {
+            max-width: 40rem;
+            padding-left: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: var(--subtle-text);
+        }
+
+        .closing ol li {
+            margin-bottom: 0.9rem;
+            padding-left: 0.3rem;
+        }
+
+        .closing strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .sources h3 {
+            font-size: 1.2rem;
+            color: var(--text);
+            margin: 2rem 0 0.5rem;
+        }
+
+        .sources ul {
+            list-style: none;
+            max-width: 46rem;
+        }
+
+        .sources li {
+            font-size: 0.95rem;
+            color: var(--subtle-text);
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sources li:last-child {
+            border-bottom: none;
+        }
+
+        .fh .foot {
+            font-size: 0.9rem;
+            margin: 2rem 0 1.5rem;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background-color: var(--darker-bg);
+                flex-direction: column;
+                align-items: center;
+                padding: 1rem 0;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease-in-out;
+                z-index: 999;
+            }
+
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-links li {
+                margin: 0.8rem 0;
+            }
+
+            .nav-links a {
+                font-size: 1.1rem;
+                padding: 0.5rem 1rem;
+                display: block;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .opening {
+                padding-top: 3rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .gen {
+                grid-template-columns: minmax(0, 1fr);
+                padding-left: 1.4rem;
+            }
+
+            .gen > .mark {
+                top: 0.7rem;
+            }
+
+            .rail {
+                padding-top: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .rail .grade {
+                margin-top: 0.15rem;
+            }
+
+            .gen h2 {
+                font-size: 1.7rem;
+            }
+
+            .band .gen {
+                padding-top: 3.2rem;
+                padding-bottom: 3rem;
+            }
+
+            .band .gen > .mark {
+                top: 3.9rem;
+            }
+
+            .band .gen h2 {
+                font-size: 1.9rem;
+            }
+
+            .after-band {
+                padding-top: 3.2rem;
+            }
+
+            .after-band > .mark {
+                top: 3.9rem;
+            }
+
+            .lives li {
+                grid-template-columns: minmax(0, 1fr);
+                row-gap: 0.15rem;
+                padding: 0.4rem 0;
+            }
+
+            .lives .axis {
+                padding: 0;
+            }
+
+            .years li {
+                grid-template-columns: 5.2rem minmax(0, 1fr);
+                column-gap: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index" class="logo">Casper Farret Jentink</a>
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <ul class="nav-links" id="mobileMenu">
+                    <li><a href="index">Home</a></li>
+                    <li><a href="cv">CV</a></li>
+                    <li><a href="research">Research & Publications</a></li>
+                    <li><a href="night">NIGHT</a></li>
+                    <li><a href="aboras">ABORAS</a></li>
+                    <li><a href="posters">Cool Posters</a></li>
+                    <li><a href="media">Media</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="fh opening">
+        <div class="container">
+            <h1>The Farret in Farret Jentink</h1>
+            <div class="subtitle">A family history, 1570 to today</div>
+            <p class="lede">The first half of my surname comes from the Farret family, English Protestants who settled in Amsterdam around 1600 to escape religious persecution. Among their descendants are Johan Farret, who exchanged poems with Petrus Stuyvesant while both served the Dutch West India Company on Curaçao, and Johan Pieter Farret, who was a member of the committee that drafted the first constitution put to a vote in the Netherlands. On this page, I outline what is known about the direct line from the earliest documented ancestor to my great-grandfather, and I indicate which parts of it remain to be verified.</p>
+
+            <p class="key-intro">As the sources differ considerably in reliability, each section is marked according to the type of evidence it relies on:</p>
+            <ul class="key">
+                <li><span class="mark full" aria-hidden="true"></span><span>Based on peer-reviewed work or official reference sources.</span></li>
+                <li><span class="mark half" aria-hidden="true"></span><span>Taken from published genealogies and family research, which I have not yet verified against the original records.</span></li>
+                <li><span class="mark" aria-hidden="true"></span><span>Family tradition, for which no source has been found so far.</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <main>
+
+    <section class="fh chart" aria-labelledby="lives-title">
+        <div class="container">
+            <h2 id="lives-title">Ten Generations, 1570 to 1930</h2>
+            <p class="note">Each bar shows the lifetime of one ancestor in the direct line, from birth or baptism to death. Faded ends indicate approximate dates. The line continues with my grandfather, my father, and myself.</p>
+
+            <ul class="lives">
+                <li class="axis" aria-hidden="true">
+                    <span></span>
+                    <span class="track">
+                        <span style="--y:1600">1600</span>
+                        <span style="--y:1700">1700</span>
+                        <span style="--y:1800">1800</span>
+                        <span style="--y:1900">1900</span>
+                    </span>
+                </li>
+                <li><span class="who">Thomas Farret <span>c. 1570–after 1647</span></span><span class="track" aria-hidden="true"><span class="bar approx" style="--s:1568;--e:1651"></span></span></li>
+                <li><span class="who">Johan Farret <span>1611–1650</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1611;--e:1650"></span></span></li>
+                <li><span class="who">Dirk Farret <span>1644–1681</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1644;--e:1681"></span></span></li>
+                <li><span class="who">Johannes Farret <span>1670–1714</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1670;--e:1714"></span></span></li>
+                <li><span class="who">Dirk Farret <span>1704–1772</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1704;--e:1772"></span></span></li>
+                <li><span class="who">Johan Pieter Farret <span>1744–1822</span></span><span class="track" aria-hidden="true"><span class="bar gold" style="--s:1744;--e:1822"></span></span></li>
+                <li><span class="who">Dirk Pieter Farret <span>1777–1856</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1777;--e:1856"></span></span></li>
+                <li><span class="who">Amarentia Theodora Farret <span>1813–1896</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1813;--e:1896"></span></span></li>
+                <li><span class="who">Dirk Pieter Farret Jentink <span>1846–1918</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1846;--e:1918"></span></span></li>
+                <li><span class="who">Pieter Cornelis Farret Jentink <span>1873–1930</span></span><span class="track" aria-hidden="true"><span class="bar" style="--s:1873;--e:1930"></span></span></li>
+            </ul>
+        </div>
+    </section>
+
+
+    <!-- ============ Thomas ============ -->
+    <section class="fh" aria-labelledby="thomas">
+        <div class="container">
+            <div class="gen">
+                <span class="mark half" aria-hidden="true"></span>
+                <div class="rail">
+                    <span class="rel">My 10× great-grandfather</span>
+                    c. 1570–after 1647
+                    <span class="grade">From family research</span>
+                </div>
+                <div>
+                    <h2 id="thomas">Thomas Farret</h2>
+                    <p class="name">Embroiderer and religious refugee, from Hereford to Amsterdam</p>
+
+                    <p>The earliest ancestor that can be identified with some confidence is Thomas Farret, who was probably born in Hereford around 1570. In early 1593, he was imprisoned in London for attending a meeting of Brownists, a group of Protestants who rejected the Church of England, and he was released on bail only after promising to conform. The leaders of the movement, Henry Barrow and John Greenwood, were hanged in April of the same year.</p>
+
+                    <p>By 1607, Thomas was living in Amsterdam, where he worked as an embroiderer and was listed among the members of the newly founded English Reformed Church. In 1617, he bought a house on the Rechtboomssloot, which he kept until 1644. The church minutes suggest a rather stubborn character: in 1637, he demanded that the minister publicly confess to having omitted a psalm after communion, and he maintained this demand even after being reprimanded twice by the church council.</p>
+
+                    <p>He made his will in Woerden in January 1647, while staying at the house of his son Josua. Most of what is known about Thomas comes from the archival research of Menno Tjoelker, another descendant, who <a href="https://www.tjoelker.org/Thomas_Farret.html">describes his life in more detail</a>.</p>
+
+                    <div class="aside">
+                        <span class="grade"><span class="mark" aria-hidden="true"></span> Family tradition</span>
+                        <p>An older genealogy states that Thomas was the son or grandson of a certain Josua Farret, a member of parliament in London who fled to Emden in 1558, the final year of the reign of Mary I. However, an initial search did not return any trace of such a person, and the History of Parliament volumes remain to be checked. Until a source is found, I consider this part of the story to be a family legend. It is nevertheless likely that Thomas himself left England for religious reasons, although this happened under Elizabeth I and not under Mary I.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============ Johan ============ -->
+    <section class="fh" aria-labelledby="johan">
+        <div class="container">
+            <div class="gen">
+                <span class="mark full" aria-hidden="true"></span>
+                <div class="rail">
+                    <span class="rel">My 9× great-grandfather</span>
+                    1611–1650
+                    <span class="grade">From peer-reviewed work</span>
+                </div>
+                <div>
+                    <h2 id="johan">Johan Farret</h2>
+                    <p class="name">WIC official on Curaçao and friend of Petrus Stuyvesant</p>
+
+                    <p>Johan, a son of Thomas, was baptized in the English church of Amsterdam in December 1611. In 1635, he sailed to Curaçao as <i lang="nl">fiscael</i> of the Dutch West India Company (WIC), the officer responsible for maintaining the legal authority of the company, including its rights to levies and taxes. The island had been taken from Spain only a year earlier and, at the time, consisted of little more than a garrison of a few hundred men around a newly built fort.</p>
+
+                    <p>In 1639, Petrus Stuyvesant, who would later become director general of New Netherland, arrived on the island as commissary of merchandise. Although a fiscael outranked a commissary, the two became friends and started to exchange poems. The initiative appears to have come from Johan, as Stuyvesant writes in his first poem that his friend had often asked him for verse as a pledge of true friendship. The exchange continued after Johan returned to the Dutch Republic in 1640 or 1641, and it lasted until at least 1645.</p>
+
+                    <p>In total, fourteen poems have survived, of which eight were written by Johan and six by Stuyvesant. The first eight form a linked series in which each poem answers the previous one using the same rhyme sounds, a form modeled on a well-known series of sonnets by P.C. Hooft, Constantijn Huygens, and others. The remaining six were written for specific occasions, such as the promotion of Stuyvesant to director of the island and the loss of his right leg to a Spanish cannonball in 1644. In the latter poem, Johan writes that the blow also struck his own heart and that he would, were it possible, carry half of the pain.</p>
+
+                    <p>After his return, Johan married Cornelia Scheij in Woerden in 1641 and became a member of the town government. He copied the poems into a manuscript album of 92 pages, which he had illustrated by two local painters. He died in January 1650. The album is currently held in the library of Het Scheepvaartmuseum in Amsterdam, and it is through this copy that the poems have been preserved.</p>
+
+                    <p>It should be noted that these poems were written in a colonial and military setting. The WIC was founded to wage war on Spain and to capture prizes, and it became increasingly involved in the trade in enslaved people. In the year before Stuyvesant arrived, about forty enslaved Africans owned by the company lived on Curaçao, and the island later developed into a major hub of the slave trade. Almost none of this is reflected in the poems. The authors of the 2018 study on the album describe it as incongruous to read verse about Greek goddesses written by men who devoted their working hours to war.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============ Three generations ============ -->
+    <section class="fh" aria-labelledby="quiet">
+        <div class="container">
+            <div class="gen">
+                <span class="mark half" aria-hidden="true"></span>
+                <div class="rail">
+                    <span class="rel">Three generations</span>
+                    1644–1772
+                    <span class="grade">From the published genealogy</span>
+                </div>
+                <div>
+                    <h2 id="quiet">Woerden, Tiel, and Amsterdam</h2>
+                    <p class="name">An apothecary, a minister, and a merchant</p>
+
+                    <ul class="people">
+                        <li>
+                            <strong>Dirk Farret, 1644–1681</strong>
+                            <span class="who">My 8× great-grandfather</span>
+                            Dirk studied medicine in Leiden and worked in Woerden, first as an apothecary and later as a physician. Additionally, he served as one of the magistrates of the town.
+                        </li>
+                        <li>
+                            <strong>Johannes Farret, 1670–1714</strong>
+                            <span class="who">My 7× great-grandfather</span>
+                            Johannes was a Reformed minister in Tiel from 1694 until his death. In 1703, he published a eulogy for the late stadtholder-king William III. Note that his grandson would later side with the opponents of the House of Orange.
+                        </li>
+                        <li>
+                            <strong>Dirk Farret, 1704–1772</strong>
+                            <span class="who">My 6× great-grandfather</span>
+                            Dirk was a tobacco merchant on the Singel in Amsterdam and, in 1757, served as one of the <i lang="nl">schepenen</i>, the magistrates who formed the court of the city. A portrait of him at the age of 32, painted by Rienk Keijert in 1736, has been offered at auction by Christie's.
+                        </li>
+                    </ul>
+
+                    <div class="aside">
+                        <span class="grade">Unverified link</span>
+                        <p>The 2018 article on the poems states that all five of Johan's children died young. According to the published genealogy, however, only four of them did, while the third child, Dirk, went on to study in Leiden and had a family of his own. As my descent depends on this Dirk, this is the first point I intend to verify in the records of Woerden.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============ Johan Pieter: the centrepiece ============ -->
+    <section class="fh band" aria-labelledby="jp">
+        <div class="container">
+            <div class="gen">
+                <span class="mark full" aria-hidden="true"></span>
+                <div class="rail">
+                    <span class="rel">My 5× great-grandfather</span>
+                    1744–1822
+                    <span class="grade">From official reference sources</span>
+                </div>
+                <div>
+                    <h2 id="jp">Johan Pieter Farret</h2>
+                    <p class="name">The first Dutch constitution and Amsterdam under French rule</p>
+
+                    <p>Johan Pieter Farret was a lawyer in Amsterdam, where he lived on the Keizersgracht. During his lifetime, the country went through five successive regimes, from the old Republic to the Kingdom of the Netherlands, and he held public office under each of them. Of all the family members described here, he was the most directly involved in national politics.</p>
+
+                    <p>In the 1780s, he sided with the Patriots, a reform movement that opposed the stadtholder William V. When the Patriots forced a purge of the Amsterdam city council in the spring of 1787, he obtained a seat, which he held for only five months. A Prussian army restored the authority of the stadtholder that autumn and, after Amsterdam capitulated in October, he was removed from the council. He was subsequently prosecuted for his membership of the Patriot defense committee of the city. The outcome of this case is not yet known to me.</p>
+
+                    <h3>The Draft Constitution of 1796–1797</h3>
+
+                    <p>French troops reached Amsterdam in January 1795, after which the stadtholder fled to England and the Batavian Republic was proclaimed. For the first time, a national parliament was elected. Johan Pieter was chosen as the representative of one of the Amsterdam districts, and he was a member of the First National Assembly from its opening on 1 March 1796 until August 1797.</p>
+
+                    <p>Two weeks after the opening, he was appointed to the committee of twenty-one members that was tasked with drafting a constitution. The main point of disagreement was whether the Netherlands should remain a federation of provinces or become a unitary state, and Johan Pieter is counted among the moderates between these two camps. The committee presented its plan in November 1796. The subsequent history of this draft, and of the constitutions that followed, is summarized below.</p>
+
+                    <ol class="years" aria-label="What became of the draft">
+                        <li><span class="yr">1796</span><span>The committee of twenty-one drafted its plan, which was a compromise between the federalists and the unitarists.</span></li>
+                        <li><span class="yr">1797</span><span>The Assembly amended the plan into a text of such length that it became known as the <i lang="nl">Dikke Boek</i> (thick book). In August, it was rejected by the voters by a margin of roughly four to one.</span></li>
+                        <li><span class="yr">1798</span><span>Following a coup by radical unitarists, a new and more centralized text was adopted. This was the first Dutch constitution to enter into force.</span></li>
+                        <li><span class="yr">1814</span><span>After the departure of the French, a new constitution was written for the monarchy. The present constitution formally derives from this text.</span></li>
+                        <li><span class="yr">1848</span><span>The revision led by Thorbecke made ministers accountable to parliament.</span></li>
+                        <li><span class="yr">1983</span><span>The most recent general revision was carried out.</span></li>
+                    </ol>
+
+                    <p>The constitution that Johan Pieter helped to draft therefore never entered into force, and the present constitution does not derive from it. However, the question that was debated in the Assembly was settled in favor of a unitary state with a single citizenship and a written constitution, and this outcome was retained after 1814.</p>
+
+                    <h3>Amsterdam Under French Rule, 1795–1813</h3>
+
+                    <p>French influence on the Netherlands can be divided into three phases: a client republic, a kingdom under a brother of Napoleon, and finally annexation by the French Empire. Johan Pieter held office during all three. In the overview below, the marked entries refer to his own career, while the remaining entries describe the events of the period.</p>
+
+                    <p class="legend"><i aria-hidden="true"></i>Career of Johan Pieter Farret</p>
+
+                    <ol class="years mixed" aria-label="Amsterdam under French rule, with the career of Johan Pieter Farret marked">
+                        <li><span class="yr">1795</span><span>French troops entered Amsterdam in January. The Batavian Republic was established, which was formally independent but in practice a client state of France.</span></li>
+                        <li class="own"><span class="yr">1795–96</span><span>He was among those charged with publishing the census of 1795, the first national population count.</span></li>
+                        <li class="own"><span class="yr">1796–97</span><span>He was a member of the First National Assembly and of its constitutional committee.</span></li>
+                        <li class="own"><span class="yr">1801</span><span>He joined the interim administration of Amsterdam, followed by the city council in 1803.</span></li>
+                        <li class="own"><span class="yr">1803–04</span><span>He served as alderman (<i lang="nl">wethouder</i>) of Amsterdam. Because of this office, his coat of arms is included in the Burgomasters' windows of the Oude Kerk.</span></li>
+                        <li><span class="yr">1806</span><span>Napoleon converted the republic into the Kingdom of Holland and placed his brother Louis on the throne.</span></li>
+                        <li class="own"><span class="yr">1807</span><span>He left the city council.</span></li>
+                        <li><span class="yr">1808</span><span>King Louis made Amsterdam his capital and took the town hall on the Dam as his residence, which is still the Royal Palace today.</span></li>
+                        <li><span class="yr">1810</span><span>Louis abdicated, after which the country was annexed by the French Empire. Amsterdam was designated the third city of the Empire, after Paris and Rome.</span></li>
+                        <li class="own"><span class="yr">1811</span><span>He was appointed judge at the court of first instance in Amsterdam, as part of the newly introduced French court system.</span></li>
+                        <li><span class="yr">1811</span><span>Napoleon visited Amsterdam in October.</span></li>
+                        <li><span class="yr">1813</span><span>The French withdrew in November. In December, the son of the last stadtholder entered Amsterdam as sovereign prince, and he became King William I in 1815.</span></li>
+                        <li class="own"><span class="yr">1814</span><span>He retained his position as judge under the new regime, as did many former Patriots.</span></li>
+                        <li class="own"><span class="yr">1822</span><span>He died in Amsterdam at the age of 77.</span></li>
+                    </ol>
+
+                    <p>Whether Johan Pieter ever met Napoleon, King Louis, or William I in person is not known. He was a serving judge in Amsterdam during the visit of Napoleon in 1811 and during the inauguration of William I in 1814, which makes such a meeting possible, but I have not found any record of it. It is, however, very likely that he knew Rutger Jan Schimmelpenninck, who represented another Amsterdam district in the same Assembly and who later led the country as Grand Pensionary.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============ Farret to Farret Jentink ============ -->
+    <section class="fh" aria-labelledby="name">
+        <div class="container">
+            <div class="gen after-band">
+                <span class="mark half" aria-hidden="true"></span>
+                <div class="rail">
+                    <span class="rel">Four generations</span>
+                    1777–1930
+                    <span class="grade">From the published genealogy</span>
+                </div>
+                <div>
+                    <h2 id="name">From Farret to Farret Jentink</h2>
+                    <p class="name">Friesland, The Hague, and the Dutch East Indies</p>
+
+                    <ul class="people">
+                        <li>
+                            <strong>Dirk Pieter Farret, 1777–1856</strong>
+                            <span class="who">My 4× great-grandfather</span>
+                            Dirk Pieter was the eldest son of Johan Pieter and became a minister, serving in Harlingen for more than thirty years.
+                        </li>
+                        <li>
+                            <strong>Amarentia Theodora Farret, 1813–1896</strong>
+                            <span class="who">My 3× great-grandmother</span>
+                            Amarentia Theodora married the minister Rudolph Jentink in Harlingen in 1845. As such, the Farret name was no longer passed on in the direct line.
+                        </li>
+                        <li>
+                            <strong>Dirk Pieter Farret Jentink, 1846–1918</strong>
+                            <span class="who">My 2× great-grandfather</span>
+                            Dirk Pieter was a colonial administrator and served as assistant resident in Borneo. In 1890, he was permitted by royal decree to add the surname of his mother to his own, and all people named Farret Jentink descend from him.
+                        </li>
+                        <li>
+                            <strong>Pieter Cornelis Farret Jentink, 1873–1930</strong>
+                            <span class="who">My great-grandfather</span>
+                            Pieter Cornelis was born on Sumatra and worked as the administrator of the Soemobito sugar factory in the Dutch East Indies.
+                        </li>
+                    </ul>
+
+                    <p>Two of these generations thus made their careers in the Dutch East Indies, one in the colonial administration and one in the sugar industry. I consider this to be as much a part of the family history as the poems of Johan Farret.</p>
+                </div>
+            </div>
+
+            <div class="gen last">
+                <span class="mark full" aria-hidden="true"></span>
+                <div class="rail"><span class="rel">Today</span></div>
+                <div><p>The line continues with my grandfather, my father, and myself.</p></div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============ Open questions ============ -->
+    <section class="fh closing" aria-labelledby="open">
+        <div class="container">
+            <h2 id="open">Open Questions</h2>
+            <p>Several parts of this history remain uncertain. The most important open points are the following:</p>
+            <ol>
+                <li><strong>The survival of Johan's son Dirk.</strong> The 2018 article and the published genealogy disagree on this point, while my descent depends on it. Guardianship or estate records drawn up in Woerden after the death of Johan in 1650 could resolve this.</li>
+                <li><strong>The existence of Josua Farret.</strong> So far, I have found no evidence that the exiled member of parliament existed.</li>
+                <li><strong>The prosecution of Johan Pieter after 1787.</strong> The outcome of the case is not known to me, and neither is whether he ever met the rulers under whom he served.</li>
+                <li><strong>The reliability of the 1937 genealogy.</strong> Nearly all later sources rely on this publication. One family researcher who used it considers it not fully reliable, although it was based on family papers that are now difficult to trace.</li>
+            </ol>
+            <p>Finally, it should be kept in mind that this is only one line out of roughly two thousand ancestors in Johan's generation. It is the line that my surname happens to follow, and also the one that is best documented.</p>
+            <p>Corrections and additions are very welcome and can be sent to <a href="mailto:casper.farret@unige.ch">casper.farret@unige.ch</a>.</p>
+        </div>
+    </section>
+
+
+    <!-- ============ Sources ============ -->
+    <section class="fh closing sources" aria-labelledby="sources">
+        <div class="container">
+            <h2 id="sources">Sources</h2>
+
+            <h3>Used for This Page</h3>
+            <ul>
+                <li>Joanne van der Woude and Jaap Jacobs, “Sweet Resoundings: Friendship Poetry by Petrus Stuyvesant and Johan Farret on Curaçao, 1639–45”, <i>William and Mary Quarterly</i> 75, no. 3 (2018): 507–540. <a href="https://doi.org/10.5309/willmaryquar.75.3.0507">doi.org/10.5309/willmaryquar.75.3.0507</a></li>
+                <li><a href="https://parlement.com/biografie/mr-jp-farret">Parlement.com, biography of Mr. J.P. Farret</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/First_National_Assembly_of_the_Batavian_Republic">Wikipedia, First National Assembly of the Batavian Republic</a> (list of members and districts)</li>
+                <li><a href="https://daktari.antenna.nl/farret.htm">Parenteel Farret</a> and <a href="https://daktari.antenna.nl/jentink.htm">Parenteel Farret Jentink</a>, online compilations based on the published genealogies</li>
+                <li><a href="https://www.tjoelker.org/Thomas_Farret.html">Menno Tjoelker, “Thomas Farret: een 16e eeuwse immigrant”</a></li>
+                <li>ECARTICO, University of Amsterdam: entries for <a href="https://ecartico.org/persons/63756">John Farret</a>, <a href="https://ecartico.org/persons/63763">Dirk Farret</a>, and <a href="https://ecartico.org/persons/63766">Johannes Farret</a></li>
+                <li><i lang="nl">Biographisch woordenboek van protestantsche godgeleerden in Nederland</i>, <a href="https://dbnl.org/tekst/bie_005biog03_01/bie_005biog03_01_0012.php">entry for Johannes Farret</a></li>
+                <li><a href="https://www.christies.com.cn/lot/lot-485817">Christie's, Rienk Keijert, portrait of Dirk Farret, 1736</a></li>
+            </ul>
+
+            <h3>Still to Be Consulted</h3>
+            <ul>
+                <li>The manuscript album: Het Scheepvaartmuseum, Amsterdam, library, Hs-0963 (inv. no. A.3462).</li>
+                <li>Jaap Jacobs (ed.), <i lang="nl">Een pant van ware vrintschap: Trantveersjes en enkele andere gedichten van Johan Farret en Petrus Stuyvesant</i> (Leiden: Kopwit, 2004). This edition contains the poems in the original Dutch.</li>
+                <li>J.D. Uhlenbeck, “Genealogie van het geslacht Farret”, <i lang="nl">De Nederlandsche Leeuw</i> 55 (1937): 179–185.</li>
+                <li>“Farret Jentink”, <i>Gens Nostra</i> 43 (1988): 300.</li>
+                <li>Johan E. Elias, <i lang="nl">De Vroedschap van Amsterdam 1578–1795</i>, vol. II, p. 988. <a href="http://resources.huygens.knaw.nl/retroboeken/elias/">Available online at the Huygens Institute</a></li>
+                <li>Charles T. Gehring and J.A. Schiltkamp, <i>Curaçao Papers, 1640–1665</i>. <a href="https://www.newnetherlandinstitute.org/application/files/4216/8372/4923/CuracaoPapers.pdf">Available online at the New Netherland Institute</a></li>
+                <li><a href="https://www.historyofparliamentonline.org/research/members">The History of Parliament</a>, members 1509–1558 and 1558–1603, to be searched for Josua Farret.</li>
+            </ul>
+
+            <p class="foot">Last updated: October 2026.</p>
+            <a href="index" class="btn">Back to Home</a>
+        </div>
+    </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="index" class="footer-link">Home</a>
+                <a href="cv" class="footer-link">CV</a>
+                <a href="research" class="footer-link">Research</a>
+                <a href="night" class="footer-link">NIGHT</a>
+                <a href="aboras" class="footer-link">ABORAS</a>
+                <a href="posters" class="footer-link">Posters</a>
+                <a href="media" class="footer-link">Media</a>
+            </div>
+            <div class="social-links">
+                <a href="https://ui.adsabs.harvard.edu/search/q=author%3A%22Farret%20Jentink%2C%20C.%22&sort=date%20desc" class="social-link" title="NASA ADS Library" target="_blank">ADS</a>
+                <a href="https://www.linkedin.com/in/casper-farret-jentink/" class="social-link" title="LinkedIn Profile" target="_blank">in</a>
+            </div>
+            <div class="copyright">
+                © 2025 Casper Farret Jentink. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    menuToggle.textContent = mobileMenu.classList.contains('active') ? '✕' : '☰';
+                });
+                
+                // Close menu when clicking a link
+                const navLinks = mobileMenu.querySelectorAll('a');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        menuToggle.textContent = '☰';
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target) && mobileMenu.classList.contains('active')) {
+                        mobileMenu.classList.remove('active');
+                        menuToggle.textContent = '☰';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
