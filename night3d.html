@@ -78,6 +78,10 @@
   .pin { position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: rgba(10, 10, 10, 0.82); border: 1.5px solid var(--accent); color: var(--text);
     font: 700 12px/1 var(--font-display); display: grid; place-items: center; cursor: pointer; will-change: transform; transition: background-color 0.15s, box-shadow 0.15s; }
   .pin { touch-action: none; }
+  /* On touch screens the markers do not take the touch themselves. Every finger reaches the 3D view directly, so rotating and
+     pinching work wherever the fingers land; a tap is matched to the nearest marker by the view (see the tap handler). */
+  @media (pointer: coarse) { .pin { pointer-events: none; } }
+  .stage.touch .pin { pointer-events: none; }
   .pin:hover, .pin.hover { background: var(--secondary-accent); color: #fff; }
   .pin.sel { background: var(--accent); color: #fff; box-shadow: 0 0 0 4px rgba(193, 80, 80, 0.3); }
 
@@ -799,7 +803,7 @@ const stage = $('stage');
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const isPhone = () => window.matchMedia('(max-width: 768px)').matches;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (window.matchMedia('(pointer: coarse)').matches) $('hint').textContent = 'Drag to rotate, pinch to zoom.';
+if (window.matchMedia('(pointer: coarse)').matches) $('hint').textContent = 'Drag to rotate, pinch to zoom, tap a number.';
 
 // ------------------------------------------------------------------ renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -1197,15 +1201,6 @@ function buildPins() {
     const pin = el('button', 'pin', String(g.n));
     pin.type = 'button'; pin.title = g.def.name; pin.setAttribute('aria-label', g.n + '. ' + g.def.name); pin.hidden = true;
     pin.addEventListener('click', () => guide.select(g.index));
-    pin.addEventListener('pointerdown', (e) => {                    // a finger that lands on a marker still rotates or pinches the model
-      if (e.pointerType !== 'touch') return;
-      pinDown = g.index;
-      const copy = new PointerEvent('pointerdown', { pointerId: e.pointerId, pointerType: e.pointerType, isPrimary: e.isPrimary, clientX: e.clientX, clientY: e.clientY, screenX: e.screenX, screenY: e.screenY, button: 0, buttons: 1, bubbles: true });
-      Object.defineProperties(copy, { pageX: { value: e.pageX }, pageY: { value: e.pageY } });      // a copied event does not get the page's scroll offset by itself
-      canvas.dispatchEvent(copy);
-      pinDown = -1;
-      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
-    });
     pin.addEventListener('pointerenter', () => guide.hover(g.index)); pin.addEventListener('pointerleave', () => guide.hover(-1));
     $('pins').append(pin); g.pin = pin;
   }
@@ -1260,25 +1255,66 @@ function pick(clientX, clientY) {
   });
   return raycaster.intersectObjects(blockers, false).length ? null : g;
 }
-let down = null, moveEvent = null, lastHover = 0, pinDown = -1;
+let down = null, moveEvent = null, lastHover = 0;
 const fingers = new Set();                                          // pointers currently down on the model: two or more is a gesture, never a tap
+window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') stage.classList.add('touch'); }, true);
 canvas.addEventListener('pointerdown', (e) => {
   fingers.add(e.pointerId);
-  down = fingers.size === 1 ? { x: e.clientX, y: e.clientY, t: performance.now(), pin: pinDown } : null;
+  down = fingers.size === 1 ? { x: e.clientX, y: e.clientY } : null;
   canvas.classList.add('dragging'); guide.hover(-1);
 });
 canvas.addEventListener('pointercancel', (e) => { fingers.delete(e.pointerId); down = null; });
-window.addEventListener('pointerup', () => canvas.classList.remove('dragging'));
+window.addEventListener('pointerup', (e) => { canvas.classList.remove('dragging'); if (e.target !== canvas) fingers.delete(e.pointerId); });
+// Safety net for touch screens. If the page ever misses the end of a touch, the view would go on believing that a finger is
+// still down: one finger would then act as two, and taps would stop working. So whenever the last finger has left the
+// screen, everything that is still counted as held is let go. Touch events are used for the count because they report
+// how many fingers are really on the screen.
+for (const name of ['setPointerCapture', 'releasePointerCapture']) {   // these may refuse a pointer that is already gone; that must not stop the controls
+  const native = canvas[name].bind(canvas);
+  canvas[name] = (id) => { try { native(id); } catch (err) {} };
+}
+let touching = 0;
+function releaseAll() {
+  fingers.clear();
+  const held = Array.isArray(controls._pointers) ? controls._pointers.slice() : [];
+  for (const id of held) canvas.dispatchEvent(new PointerEvent('pointercancel', { pointerId: id, pointerType: 'touch', bubbles: true }));
+  canvas.classList.remove('dragging');
+}
+for (const type of ['touchstart', 'touchend', 'touchcancel']) window.addEventListener(type, (e) => {
+  touching = e.touches.length;
+  if (!touching) setTimeout(() => { if (!touching) releaseAll(); }, 0);     // after the pointer events of this touch have been handled
+}, { capture: true, passive: true });
 canvas.addEventListener('pointerup', (e) => {
   fingers.delete(e.pointerId);
   const d = down; down = null;
-  if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5 || performance.now() - d.t > 600) return;
-  if (d.pin >= 0) { guide.select(d.pin); return; }
+  // A press that ends where it began is a tap, however long it lasted. A finger is less steady than a mouse.
+  if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > (e.pointerType === 'touch' ? 12 : 5)) return;
+  // A tap on or right next to a numbered marker selects that component.
+  const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, touch = e.pointerType === 'touch';
+  let near = null, best = (touch ? 24 : 14) ** 2;
+  for (const q of groups) { if (!q.shown) continue; const dd = (q.sx - x) ** 2 + (q.sy - y) ** 2; if (dd < best) { best = dd; near = q; } }
+  if (near) { guide.select(near.index); return; }
+  if (touch) { guide.select(-1); return; }                          // on a touch screen, a tap anywhere else clears the selection
   const g = pick(e.clientX, e.clientY);
   guide.select(g ? g.index : -1);
 });
 canvas.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && !down) moveEvent = e; });
 canvas.addEventListener('pointerleave', () => { moveEvent = null; guide.hover(-1); });
+
+// Diagnostic readout for touch problems: add ?debug to the address. Shows what the page believes is held down and the last events.
+if (/[?&]debug\b/.test(location.search)) {
+  const box = el('pre'), log = [];
+  box.style.cssText = 'position:absolute;left:8px;top:100px;z-index:5;margin:0;padding:6px 8px;font:11px/1.35 monospace;color:#9f9;background:rgba(0,0,0,.78);pointer-events:none;white-space:pre-wrap;max-width:75%;border-radius:4px';
+  stage.append(box);
+  const show = () => { box.textContent = 'fingers on screen ' + touching + ' | view holds ' + JSON.stringify([...fingers]) + ' | controls hold ' + JSON.stringify(controls._pointers || '?') + ' | selected ' + (guide.selected() + 1) + '\n' + log.join('\n'); };
+  for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'gotpointercapture', 'lostpointercapture', 'touchstart', 'touchend', 'touchcancel', 'click']) window.addEventListener(type, (e) => {
+    const t = e.target, where = t && (t.id || (t.className && String(t.className).split(' ')[0]) || t.nodeName);
+    log.push(type + ' ' + (e.pointerId !== undefined ? '#' + e.pointerId + (e.isPrimary ? 'p' : '') : e.touches ? 'n=' + e.touches.length : '') + (e.isTrusted ? '' : ' (copy)') + ' @' + where);
+    if (log.length > 10) log.shift();
+    setTimeout(show, 30);
+  }, true);
+  show();
+}
 
 // ------------------------------------------------------------------ pins
 const pv = new THREE.Vector3();
@@ -1292,8 +1328,9 @@ function updatePins() {
     if (g.def.pinLift) g.center.y += g.def.pinLift;
     pv.copy(g.center).project(camera);
     const hide = pv.z > 1 || pv.z < -1 || Math.abs(pv.x) > 1 || Math.abs(pv.y) > 1 || (g.def.inside && state.lid > 0.5);
-    g.pin.hidden = hide;
-    if (!hide) g.pin.style.transform = `translate(${((pv.x + 1) / 2 * w).toFixed(1)}px, ${((1 - pv.y) / 2 * h).toFixed(1)}px) translate(-50%, -50%)`;
+    g.pin.hidden = hide; g.shown = !hide;
+    g.sx = (pv.x + 1) / 2 * w; g.sy = (1 - pv.y) / 2 * h;          // marker position in the view, also used to match taps
+    if (!hide) g.pin.style.transform = `translate(${g.sx.toFixed(1)}px, ${g.sy.toFixed(1)}px) translate(-50%, -50%)`;
   }
 }
 
