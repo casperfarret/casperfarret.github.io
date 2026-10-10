@@ -77,6 +77,11 @@
 
   .pin { position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: rgba(10, 10, 10, 0.82); border: 1.5px solid var(--accent); color: var(--text);
     font: 700 12px/1 var(--font-display); display: grid; place-items: center; cursor: pointer; will-change: transform; transition: background-color 0.15s, box-shadow 0.15s; }
+  .pin { touch-action: none; }
+  /* On touch screens the markers do not take the touch themselves. Every finger reaches the 3D view directly, so rotating and
+     pinching work wherever the fingers land; a tap is matched to the nearest marker by the view (see the tap handler). */
+  @media (pointer: coarse) { .pin { pointer-events: none; } }
+  .stage.touch .pin { pointer-events: none; }
   .pin:hover, .pin.hover { background: var(--secondary-accent); color: #fff; }
   .pin.sel { background: var(--accent); color: #fff; box-shadow: 0 0 0 4px rgba(193, 80, 80, 0.3); }
 
@@ -121,7 +126,11 @@
   /* One panel: the sky on one side, what the spectrograph makes of it on the other. On a phone the parts stack, and are kept
      short enough that the planet and the spectrum fit on the screen together. */
   .t-panel { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); grid-template-areas: "a b" "c d"; gap: 1rem 2rem; margin-top: 1.5rem; padding: 1.5rem;
-    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    background: rgba(18, 18, 18, 0.94); border: 1px solid var(--border); border-radius: 12px; }
+  /* No backdrop blur here or on anything inside: this panel repaints many times a second, and blurring what lies behind a
+     repainting element makes some browsers flicker. Each drawing surface is also its own paint box. */
+  .t-panel .chip { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(10, 10, 10, 0.9); }
+  .t-scene-wrap, .t-det, .t-plot { contain: layout paint; isolation: isolate; }
   .t-a, .t-b { display: flex; flex-direction: column; gap: 0.8rem; min-width: 0; }
   .t-a { grid-area: a; } .t-b { grid-area: b; }
   .t-panel h3 { font-size: 0.8rem; font-family: var(--font-body); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--subtle-text); }
@@ -139,7 +148,7 @@
   .t-tip { position: absolute; top: 6px; pointer-events: none; background: var(--chip); border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; font-size: 0.8rem; color: var(--text);
     white-space: nowrap; font-variant-numeric: tabular-nums; transform: translateX(-50%); }
   .t-status, .t-readout { padding-top: 1rem; border-top: 1px solid var(--border); }
-  .t-status { grid-area: c; color: var(--text); font-size: 0.95rem; min-height: 4.2em; }
+  .t-status { grid-area: c; color: var(--text); font-size: 0.95rem; }
   .t-readout { grid-area: d; display: flex; align-items: baseline; gap: 0.75rem; }
   .t-readout .v { font: 700 1.9rem/1 var(--font-display); color: var(--text); font-variant-numeric: tabular-nums; min-width: 4.6ch; flex: none; }
   .t-readout .k { color: var(--subtle-text); font-size: 0.9rem; }
@@ -153,7 +162,6 @@
     .t-plot { flex: none; min-height: 0; height: 200px; }
     .t-readout { padding-top: 0.75rem; }
     .t-readout .v { font-size: 1.6rem; }
-    .t-status { min-height: 0; }
   }
   @media (max-width: 768px) { .transit h2 { font-size: 1.6rem; } }
   .loader { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
@@ -566,25 +574,37 @@
     }
 
     // --- state
+    var MSG = ['Before the transit. NIGHT records the star’s own spectrum, with the dark lines of the star’s atmosphere.',
+      'The planet has not reached the star yet, but its outer atmosphere has. The dip starts to grow.',
+      'In transit. The helium around the planet now covers part of the star and a dip appears at 1083.3 nm.',
+      'The planet has left the star, but its tail of escaping helium is still crossing. The dip lingers, at slightly shorter wavelengths, because this gas is being blown towards us.',
+      'The transit is over and the spectrum is back to that of the star alone.'];
+    function reserve() {                                           // keep room for the longest message, so the page never moves when the text changes
+      var el = $('t-status'), c = el.cloneNode(false), h = 0;
+      c.removeAttribute('id'); c.removeAttribute('aria-live'); c.setAttribute('aria-hidden', 'true');
+      c.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;min-height:0;width:' + el.getBoundingClientRect().width + 'px';
+      el.parentNode.appendChild(c);
+      for (var i = 0; i < MSG.length; i++) { c.textContent = MSG[i]; h = Math.max(h, c.getBoundingClientRect().height); }
+      el.parentNode.removeChild(c);
+      h = Math.ceil(h) + 'px'; if (el.style.minHeight !== h) el.style.minHeight = h;
+    }
     function status() {
       var d = depth(), off = Math.hypot(pos, B) > 1 + RP, pct = (d * 100).toFixed(1) + '%';
-      $('t-depth').textContent = pct;
-      var s;
-      if (d < 0.002) s = pos < 0 ? 'Before the transit. NIGHT records the star’s own spectrum, with the dark lines of the star’s atmosphere.' : 'The transit is over and the spectrum is back to that of the star alone.';
-      else if (!off) s = 'In transit. The helium around the planet now covers part of the star and a dip appears at 1083.3 nm.';
-      else if (pos < 0) s = 'The planet has not reached the star yet, but its outer atmosphere has. The dip starts to grow.';
-      else s = 'The planet has left the star, but its tail of escaping helium is still crossing. The dip lingers, at slightly shorter wavelengths, because this gas is being blown towards us.';
-      $('t-status').textContent = s;
+      if (pct !== status.pct) $('t-depth').textContent = pct;
+      var s = MSG[d < 0.002 ? (pos < 0 ? 0 : 4) : !off ? 2 : pos < 0 ? 1 : 3];
+      if (s === status.shown && pct === status.pct) return;
+      if (s !== status.shown) $('t-status').textContent = s;
+      status.shown = s; status.pct = pct;
       slider.setAttribute('aria-valuetext', s + ' Helium absorption ' + pct + '.');
     }
-    var queued = false;
+    var queued = false, moved = false, drawn = 0;
     function setPos(p, fromSlider) {
       pos = Math.max(X0, Math.min(X1, p)); cur = cover(pos);
       if (!fromSlider) slider.value = Math.round((pos - X0) / (X1 - X0) * 1000);
       if (queued) return;
       queued = true;
       requestAnimationFrame(function (now) {
-        queued = false; drawDetector(); drawPlot(); drawTip(); status(); if (!looping()) drawScene(now);
+        queued = false; drawDetector(); drawPlot(); drawTip(); status(); if (!looping()) drawScene(now); else moved = true;
         document.dispatchEvent(new CustomEvent('night:transit'));
       });
     }
@@ -601,7 +621,9 @@
         setPos(pos + dt * (X1 - X0) / 11);
         if (pos >= X1) play(false);
       }
-      if (looping()) { drawScene(now); requestAnimationFrame(loop); } else { loop.on = false; drawScene(now); }
+      if (!looping()) { loop.on = false; drawScene(now); return; }
+      if (moved || playing || now - drawn >= 32) { moved = false; drawn = now; drawScene(now); }
+      requestAnimationFrame(loop);
     }
     function wake() { if (!loop.on && looping()) { loop.on = true; requestAnimationFrame(loop); } }
 
@@ -620,7 +642,7 @@
     });
     plotC.addEventListener('pointerleave', function () { hoverU = -1; drawPlot(); drawTip(); });
 
-    function redraw() { drawDetector(); drawPlot(); drawTip(); drawScene(performance.now()); }
+    function redraw() { reserve(); drawDetector(); drawPlot(); drawTip(); drawScene(performance.now()); }
     if (window.ResizeObserver) new ResizeObserver(redraw).observe(root); else window.addEventListener('resize', redraw);
     if (window.IntersectionObserver) new IntersectionObserver(function (en) {
       inView = en[0].isIntersecting;
@@ -628,7 +650,7 @@
       wake();
     }, { threshold: [0, 0.75] }).observe(sceneC.parentNode); else { inView = true; wake(); }
     document.addEventListener('visibilitychange', wake);
-    status(); redraw();
+    redraw(); status();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(redraw);
   })();
   // Visible message if the viewer cannot start.
@@ -784,7 +806,7 @@ const stage = $('stage');
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const isPhone = () => window.matchMedia('(max-width: 768px)').matches;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (window.matchMedia('(pointer: coarse)').matches) $('hint').textContent = 'Drag to rotate, pinch to zoom.';
+if (window.matchMedia('(pointer: coarse)').matches) $('hint').textContent = 'Drag to rotate, pinch to zoom, tap a number.';
 
 // ------------------------------------------------------------------ renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -835,6 +857,15 @@ controls.minDistance = 0.12;
 controls.maxDistance = 9;
 controls.maxPolarAngle = Math.PI * 0.497;
 controls.zoomToCursor = true;
+// three.js r170 measures the centre of a pinch in page coordinates but compares it with the canvas's place in the window.
+// On a page that has been scrolled, a pinch then zooms towards a point far from the fingers. Take the scroll offset out.
+if (typeof controls._updateZoomParameters === 'function' && Array.isArray(controls._pointers)) {
+  const zoomAt = controls._updateZoomParameters;
+  controls._updateZoomParameters = function (x, y) {
+    const pinch = this._pointers.length > 1;
+    zoomAt.call(this, pinch ? x - window.scrollX : x, pinch ? y - window.scrollY : y);
+  };
+} else canvas.addEventListener('pointerdown', (e) => { controls.zoomToCursor = e.pointerType === 'mouse'; });   // other versions: pinch zooms about the centre
 controls.enableZoom = false;                       // the page must stay scrollable: wheel zoom starts after a click on the model
 canvas.addEventListener('pointerdown', () => { controls.enableZoom = true; });
 stage.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') controls.enableZoom = false; });
@@ -1144,13 +1175,13 @@ function buildDetectorImage(g) {
   };
   light.detector();
 }
-let detectorStale = false;                                     // redrawn in the frame loop, and only while the model is on screen
+let detectorStale = false, detectorAt = 0;                     // redrawn in the frame loop: only while the model is on screen, and a few times a second at most
 document.addEventListener('night:transit', () => { detectorStale = true; });
 function syncLight() {                                          // the path only matches the optics while nothing is exploded
   if (light.group) light.group.visible = light.on && state.explode < 0.005;
   invalidate();
 }
-new IntersectionObserver((entries) => { light.inView = entries[0].isIntersecting; }).observe(stage);
+new IntersectionObserver((entries) => { light.inView = entries[0].intersectionRatio >= 0.3; }, { threshold: [0, 0.3] }).observe(stage);
 
 // ------------------------------------------------------------------ camera moves
 let tween = null;
@@ -1228,16 +1259,65 @@ function pick(clientX, clientY) {
   return raycaster.intersectObjects(blockers, false).length ? null : g;
 }
 let down = null, moveEvent = null, lastHover = 0;
-canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; canvas.classList.add('dragging'); guide.hover(-1); });
-window.addEventListener('pointerup', () => canvas.classList.remove('dragging'));
+const fingers = new Set();                                          // pointers currently down on the model: two or more is a gesture, never a tap
+window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') stage.classList.add('touch'); }, true);
+canvas.addEventListener('pointerdown', (e) => {
+  fingers.add(e.pointerId);
+  down = fingers.size === 1 ? { x: e.clientX, y: e.clientY } : null;
+  canvas.classList.add('dragging'); guide.hover(-1);
+});
+canvas.addEventListener('pointercancel', (e) => { fingers.delete(e.pointerId); down = null; });
+window.addEventListener('pointerup', (e) => { canvas.classList.remove('dragging'); if (e.target !== canvas) fingers.delete(e.pointerId); });
+// Safety net for touch screens. If the page ever misses the end of a touch, the view would go on believing that a finger is
+// still down: one finger would then act as two, and taps would stop working. So whenever the last finger has left the
+// screen, everything that is still counted as held is let go. Touch events are used for the count because they report
+// how many fingers are really on the screen.
+for (const name of ['setPointerCapture', 'releasePointerCapture']) {   // these may refuse a pointer that is already gone; that must not stop the controls
+  const native = canvas[name].bind(canvas);
+  canvas[name] = (id) => { try { native(id); } catch (err) {} };
+}
+let touching = 0;
+function releaseAll() {
+  fingers.clear();
+  const held = Array.isArray(controls._pointers) ? controls._pointers.slice() : [];
+  for (const id of held) canvas.dispatchEvent(new PointerEvent('pointercancel', { pointerId: id, pointerType: 'touch', bubbles: true }));
+  canvas.classList.remove('dragging');
+}
+for (const type of ['touchstart', 'touchend', 'touchcancel']) window.addEventListener(type, (e) => {
+  touching = e.touches.length;
+  if (!touching) setTimeout(() => { if (!touching) releaseAll(); }, 0);     // after the pointer events of this touch have been handled
+}, { capture: true, passive: true });
 canvas.addEventListener('pointerup', (e) => {
+  fingers.delete(e.pointerId);
   const d = down; down = null;
-  if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5 || performance.now() - d.t > 600) return;
+  // A press that ends where it began is a tap, however long it lasted. A finger is less steady than a mouse.
+  if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > (e.pointerType === 'touch' ? 12 : 5)) return;
+  // A tap on or right next to a numbered marker selects that component.
+  const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, touch = e.pointerType === 'touch';
+  let near = null, best = (touch ? 24 : 14) ** 2;
+  for (const q of groups) { if (!q.shown) continue; const dd = (q.sx - x) ** 2 + (q.sy - y) ** 2; if (dd < best) { best = dd; near = q; } }
+  if (near) { guide.select(near.index); return; }
+  if (touch) { guide.select(-1); return; }                          // on a touch screen, a tap anywhere else clears the selection
   const g = pick(e.clientX, e.clientY);
   guide.select(g ? g.index : -1);
 });
 canvas.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && !down) moveEvent = e; });
 canvas.addEventListener('pointerleave', () => { moveEvent = null; guide.hover(-1); });
+
+// Diagnostic readout for touch problems: add ?debug to the address. Shows what the page believes is held down and the last events.
+if (/[?&]debug\b/.test(location.search)) {
+  const box = el('pre'), log = [];
+  box.style.cssText = 'position:absolute;left:8px;top:100px;z-index:5;margin:0;padding:6px 8px;font:11px/1.35 monospace;color:#9f9;background:rgba(0,0,0,.78);pointer-events:none;white-space:pre-wrap;max-width:75%;border-radius:4px';
+  stage.append(box);
+  const show = () => { box.textContent = 'fingers on screen ' + touching + ' | view holds ' + JSON.stringify([...fingers]) + ' | controls hold ' + JSON.stringify(controls._pointers || '?') + ' | selected ' + (guide.selected() + 1) + '\n' + log.join('\n'); };
+  for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'gotpointercapture', 'lostpointercapture', 'touchstart', 'touchend', 'touchcancel', 'click']) window.addEventListener(type, (e) => {
+    const t = e.target, where = t && (t.id || (t.className && String(t.className).split(' ')[0]) || t.nodeName);
+    log.push(type + ' ' + (e.pointerId !== undefined ? '#' + e.pointerId + (e.isPrimary ? 'p' : '') : e.touches ? 'n=' + e.touches.length : '') + (e.isTrusted ? '' : ' (copy)') + ' @' + where);
+    if (log.length > 10) log.shift();
+    setTimeout(show, 30);
+  }, true);
+  show();
+}
 
 // ------------------------------------------------------------------ pins
 const pv = new THREE.Vector3();
@@ -1251,8 +1331,9 @@ function updatePins() {
     if (g.def.pinLift) g.center.y += g.def.pinLift;
     pv.copy(g.center).project(camera);
     const hide = pv.z > 1 || pv.z < -1 || Math.abs(pv.x) > 1 || Math.abs(pv.y) > 1 || (g.def.inside && state.lid > 0.5);
-    g.pin.hidden = hide;
-    if (!hide) g.pin.style.transform = `translate(${((pv.x + 1) / 2 * w).toFixed(1)}px, ${((1 - pv.y) / 2 * h).toFixed(1)}px) translate(-50%, -50%)`;
+    g.pin.hidden = hide; g.shown = !hide;
+    g.sx = (pv.x + 1) / 2 * w; g.sy = (1 - pv.y) / 2 * h;          // marker position in the view, also used to match taps
+    if (!hide) g.pin.style.transform = `translate(${g.sx.toFixed(1)}px, ${g.sy.toFixed(1)}px) translate(-50%, -50%)`;
   }
 }
 
@@ -1296,7 +1377,7 @@ function frame(now) {
     else placePulses(Math.min(0.1, gap / 1000) * 0.8);
     dirty = true;
   }
-  if (detectorStale && light.detector && light.inView) { detectorStale = false; light.detector(); }
+  if (detectorStale && light.detector && light.inView && light.group && light.group.visible && now - detectorAt > 150) { detectorStale = false; detectorAt = now; light.detector(); }
   if (controls.update()) dirty = true;
   if (dirty) { dirty = false; renderer.render(scene, camera); updatePins(); }
 }
